@@ -47,6 +47,14 @@ class MoneyTest {
             
         });
     }
+    testAdditionOfDollarsAndEuros() {
+        let fiveDollars = new Money(5, "USD");
+        let tenEuros = new Money(10, "EUR");
+        let portfolio = new Portfolid();
+        portfolio.add(fiveDollars, tenEuros);
+        let expectedValue = new Money(17, "USD");
+        assert.deepStrictEqual(portfolio.evaluate("USD"), expectedValue);
+    }
 }
 
 new MoneyTest().runAllTest()
