@@ -1,8 +1,15 @@
 const assert = require('assert');
 const Money = require('./money');
 const Portfolio = require('./portfolio');
+const Bank = require('./bank')
 
 class MoneyTest {
+    constructor() {
+        this.bank = new Bank();
+        this.bank.addExchangeRate("EUR", "USD", 1.2);
+        this.bank.addExchangeRate("USD", "KRW", 1100);
+    }
+
     getAllTestMethods() {
         let moneyPrototype = MoneyTest.prototype;
         let allProps = Object.getOwnPropertyNames(moneyPrototype);
@@ -11,25 +18,29 @@ class MoneyTest {
         });
         return testMethods;
     }
+
     testMultiplication() {
         let tenEuros = new Money(10, "EUR");
         let twentyEuros = new Money(20, "EUR");
         assert.deepStrictEqual(tenEuros.times(2), twentyEuros);
     }
+
     testDivision() {
         let originalMoney = new Money(4002, "KRW")
         let actualMoneyAfterDivision = originalMoney.divide(4)
         let expectedMoneyAfterDivision = new Money(1000.5, "KRW")
         assert.deepStrictEqual(actualMoneyAfterDivision, expectedMoneyAfterDivision)
     }
+
     testAddition() {
         let fiveDollars = new Money(5, "USD");
         let tenDollars = new Money(10, "USD");
         let fifteenDollars = new Money(15, "USD")
         let portfolio = new Portfolio();
         portfolio.add(fiveDollars, tenDollars);
-        assert.deepStrictEqual(portfolio.evaluate("USD"), fifteenDollars);
+        assert.deepStrictEqual(portfolio.evaluate(this.bank,"USD"), fifteenDollars);
     }
+
     runAllTest() {
         let testMethods = this.getAllTestMethods();
         testMethods.forEach(m => {
@@ -47,22 +58,25 @@ class MoneyTest {
             
         });
     }
+
     testAdditionOfDollarsAndEuros() {
         let fiveDollars = new Money(5, "USD");
         let tenEuros = new Money(10, "EUR");
         let portfolio = new Portfolio();
         portfolio.add(fiveDollars, tenEuros);
         let expectedValue = new Money(17, "USD");
-        assert.deepStrictEqual(portfolio.evaluate("USD"), expectedValue);
+        assert.deepStrictEqual(portfolio.evaluate(this.bank, "USD"), expectedValue);
     }
+
     testAdditionOfDollarsAndWons() {
         let oneDollar = new Money(1, "USD");
         let elevenHundredWon = new Money(1100, "KRW")
         let portfolio = new Portfolio();
         portfolio.add(oneDollar, elevenHundredWon);
         let expectedValue = new Money(2200, "KRW");
-        assert.deepStrictEqual(portfolio.evaluate("KRW"), expectedValue)
+        assert.deepStrictEqual(portfolio.evaluate(this.bank, "KRW"), expectedValue)
     }
+
     testAdditionWithMultipleMissingExchangeRates() {
         let oneDollar = new Money(1, "USD");
         let oneEuro = new Money(1, "EUR");
@@ -71,7 +85,30 @@ class MoneyTest {
         portfolio.add(oneDollar, oneEuro, oneWon);
         let expectedError = new Error(
             "Missing exchange rate(s):[USD->Kalganid,EUR->Kalganid,KRW->Kalganid]");
-        assert.throws(function() {portfolio.evaluate("Kalganid")}, expectedError)
+        ////////////////////////////////////////
+        // 이렇게 "할 수" 있지만 하지 않는다!
+        ////////////////////////////////////////
+        // let bank = this.bank;
+        // assert.throws(function() {portfolio.evaluate(bank, "Kalganid")}, expectedError)
+        assert.throws(() => portfolio.evaluate(this.bank, "Kalganid"), expectedError)
+        // 익명 함수를 사용하면 this가 익명함수 스코프에 바인딩 됨
+        // 화살표 함수를 사용하면 this가 상위함수 스코프에 바인딩
+    }
+
+    testConversion() {
+        let bank = new Bank();
+        bank.addExchangeRate("EUR", "USD", 1.2);
+        let tenEuros = new Money(10, "EUR");
+        assert.deepStrictEqual(
+            bank.convert(tenEuros, "USD"), new Money(12, "USD"));
+    }
+
+    testConversionWithMissingExchangeRate() {
+        let bank = new Bank();
+        let tenEuros = new Money(10, "EUR");
+        let expectedError = new Error("EUR->Kalganid");
+        assert.throws(function () {bank.convert(tenEuros, "Kalganid")},
+            expectedError);
     }
 }
 
