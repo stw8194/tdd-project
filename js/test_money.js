@@ -19,6 +19,15 @@ class MoneyTest {
         return testMethods;
     }
 
+    // 한 테스트가 다른 테스트에 미치는 원치 않는 부작용 확인
+    randomizeTestOrder(testMethods) {
+        for (let i = testMethods.length -1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [testMethods[i], testMethods[j]] = [testMethods[j], testMethods[i]];
+        }
+        return testMethods;
+    }
+
     testMultiplication() {
         let tenEuros = new Money(10, "EUR");
         let twentyEuros = new Money(20, "EUR");
@@ -92,15 +101,6 @@ class MoneyTest {
         assert.throws(() => {this.bank.convert(tenEuros, "Kalganid")},
             expectedError);
     }
-    
-    // 한 테스트가 다른 테스트에 미치는 원치 않는 부작용 확인
-    // randomizeTestOrder(testMethods) {
-    //     for (let i = testMethods.length -1; i > 0; i--) {
-    //         const j = Math.floor(Math.random() * (i + 1));
-    //         [testMethods[i], testMethods[j]] = [testMethods[j], testMethods[i]];
-    //     }
-    //     return testMethods;
-    // }
 
     runAllTest() {
         let testMethods = this.getAllTestMethods();
