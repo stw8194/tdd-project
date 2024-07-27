@@ -1,0 +1,5 @@
+{
+    "esversion" : 6,
+    "maxcomplexity" : 1
+    // maxcomplexity를 1로 설정해서 균일한 복잡도 프로필의 코드를 가졌음을 볼 수 있음
+}

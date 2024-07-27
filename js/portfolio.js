@@ -2,7 +2,7 @@ const Money = require("./money");
 
 class Portfolio {
     constructor(moneys) {
-        this.moneys = []
+        this.moneys = [];
     }
 
     add(...money) {

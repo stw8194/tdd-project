@@ -1,4 +1,4 @@
-const Money = require("./money")
+const Money = require("./money");
 
 class Bank {
     constructor() {
